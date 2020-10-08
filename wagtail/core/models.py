@@ -24,6 +24,7 @@ from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.http import Http404
 from django.http.request import split_domain_port
+from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
 from django.urls import NoReverseMatch, reverse
 from django.utils import timezone, translation
@@ -2048,6 +2049,29 @@ class Page(AbstractPage, index.Indexed, ClusterableModel, metaclass=PageBase):
             if numchild > 0:
                 page_copy.numchild = numchild
                 page_copy.save(clean=False, update_fields=['numchild'])
+
+            # Copy privacy permission
+            if self.get_view_restrictions().exists() and to:
+
+                # Issue 6212: The privacy settings are on the page being copied.
+                # On copy:
+                # 1.New parent has privacy settings. Do nothing
+                # 2. New parent has no privacy settings. Copy the settings (that is, create a new
+                # PageViewRestriction with the page foreign key set to the newly created page)
+                # The privacy settings are  on the page parent. On copy: do nothing.
+                # If the new parent has privacy settings, they will be inherited.
+
+                parent_page_restriction = to.get_view_restrictions()
+                if not parent_page_restriction.exists():
+                    privacy_settings_to_copy = get_object_or_404(PageViewRestriction, page_id=self.id)
+                    privacy_settings_to_copy_fields = {
+                        'restriction_type': privacy_settings_to_copy.restriction_type,
+                        'password': privacy_settings_to_copy.password,
+                        'page': page_copy,
+                    }
+
+                    page_view_restriction = PageViewRestriction(**privacy_settings_to_copy_fields)
+                    page_view_restriction.save(user=user)
 
         return page_copy
 
