@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
 from wagtail import __version__
-from wagtail.utils.setup import assets, sdist, check_bdist_egg
+from wagtail.utils.setup import assets, check_bdist_egg, sdist
+
 
 try:
-    from setuptools import setup, find_packages
+    from setuptools import find_packages, setup
 except ImportError:
     from distutils.core import setup
 
@@ -26,13 +27,9 @@ install_requires = [
     "djangorestframework>=3.11.1,<4.0",
     "django-filter>=2.2,<3.0",
     "draftjs_exporter>=2.1.5,<3.0",
-    "Pillow>=4.0.0,<8.0.0",
+    "Pillow>=4.0.0,<9.0.0",
     "beautifulsoup4>=4.8,<4.9",
     "html5lib>=0.999,<2",
-    # RemovedInWagtail212Warning: unidecode is only used by _migrate_legacy_clean_name in wagtail.contrib.forms
-    # and will be made a non-default dependency once enough time has passed from the 2.10 release to allow old
-    # data to be migrated.
-    "Unidecode>=0.04.14,<2.0",
     "Willow>=1.4,<1.5",
     "requests>=2.11.1,<3.0",
     "l18n>=2018.5",
@@ -46,16 +43,17 @@ testing_extras = [
     # Required for running the tests
     'python-dateutil>=2.2',
     'pytz>=2014.7',
-    'elasticsearch>=1.0.0,<3.0',
+    'elasticsearch>=5.0,<6.0',
     'Jinja2>=2.8,<3.0',
-    'boto3>=1.4,<1.5',
+    'boto3>=1.16,<1.17',
     'freezegun>=0.3.8',
     'openpyxl>=2.6.4',
+    'Unidecode>=0.04.14,<2.0',
 
     # For coverage and PEP8 linting
     'coverage>=3.7.0',
     'flake8>=3.6.0',
-    'isort==4.2.5',
+    'isort==5.6.4',  # leave this pinned - it tends to change rules between patch releases
     'flake8-blind-except==0.1.1',
     'flake8-print==2.0.2',
     'doc8==0.8.1',
@@ -107,6 +105,7 @@ https://github.com/wagtail/wagtail/.",
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
         'Framework :: Django',
         'Framework :: Django :: 2.2',
         'Framework :: Django :: 3.0',

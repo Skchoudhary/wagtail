@@ -7,10 +7,18 @@ Object {
       "count": 0,
       "items": Array [],
     },
+    "id": 0,
     "isError": true,
-    "isFetching": false,
+    "isFetchingChildren": false,
+    "isFetchingTranslations": true,
     "meta": Object {
       "children": Object {},
+      "parent": null,
+      "status": Object {
+        "has_unpublished_changes": true,
+        "live": false,
+        "status": "",
+      },
     },
   },
 }
@@ -23,10 +31,18 @@ Object {
       "count": 0,
       "items": Array [],
     },
+    "id": 0,
     "isError": false,
-    "isFetching": true,
+    "isFetchingChildren": true,
+    "isFetchingTranslations": false,
     "meta": Object {
       "children": Object {},
+      "parent": null,
+      "status": Object {
+        "has_unpublished_changes": true,
+        "live": false,
+        "status": "",
+      },
     },
   },
 }
@@ -43,10 +59,18 @@ Object {
         5,
       ],
     },
+    "id": 0,
     "isError": false,
-    "isFetching": false,
+    "isFetchingChildren": false,
+    "isFetchingTranslations": false,
     "meta": Object {
       "children": Object {},
+      "parent": null,
+      "status": Object {
+        "has_unpublished_changes": true,
+        "live": false,
+        "status": "",
+      },
     },
   },
   "3": Object {
@@ -56,9 +80,16 @@ Object {
     },
     "id": 3,
     "isError": false,
-    "isFetching": false,
+    "isFetchingChildren": false,
+    "isFetchingTranslations": false,
     "meta": Object {
       "children": Object {},
+      "parent": null,
+      "status": Object {
+        "has_unpublished_changes": true,
+        "live": false,
+        "status": "",
+      },
     },
   },
   "4": Object {
@@ -68,9 +99,16 @@ Object {
     },
     "id": 4,
     "isError": false,
-    "isFetching": false,
+    "isFetchingChildren": false,
+    "isFetchingTranslations": false,
     "meta": Object {
       "children": Object {},
+      "parent": null,
+      "status": Object {
+        "has_unpublished_changes": true,
+        "live": false,
+        "status": "",
+      },
     },
   },
   "5": Object {
@@ -80,9 +118,16 @@ Object {
     },
     "id": 5,
     "isError": false,
-    "isFetching": false,
+    "isFetchingChildren": false,
+    "isFetchingTranslations": false,
     "meta": Object {
       "children": Object {},
+      "parent": null,
+      "status": Object {
+        "has_unpublished_changes": true,
+        "live": false,
+        "status": "",
+      },
     },
   },
 }
@@ -95,10 +140,18 @@ Object {
       "count": 0,
       "items": Array [],
     },
+    "id": 0,
     "isError": true,
-    "isFetching": false,
+    "isFetchingChildren": false,
+    "isFetchingTranslations": true,
     "meta": Object {
       "children": Object {},
+      "parent": null,
+      "status": Object {
+        "has_unpublished_changes": true,
+        "live": false,
+        "status": "",
+      },
     },
   },
 }
@@ -111,10 +164,18 @@ Object {
       "count": 0,
       "items": Array [],
     },
+    "id": 0,
     "isError": false,
-    "isFetching": false,
+    "isFetchingChildren": false,
+    "isFetchingTranslations": false,
     "meta": Object {
       "children": Object {},
+      "parent": null,
+      "status": Object {
+        "has_unpublished_changes": true,
+        "live": false,
+        "status": "",
+      },
     },
   },
 }
@@ -127,10 +188,18 @@ Object {
       "count": 0,
       "items": Array [],
     },
+    "id": 0,
     "isError": false,
-    "isFetching": false,
+    "isFetchingChildren": false,
+    "isFetchingTranslations": false,
     "meta": Object {
       "children": Object {},
+      "parent": null,
+      "status": Object {
+        "has_unpublished_changes": true,
+        "live": false,
+        "status": "",
+      },
     },
   },
 }

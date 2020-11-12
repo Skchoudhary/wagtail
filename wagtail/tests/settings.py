@@ -1,5 +1,6 @@
 import os
 
+
 DEBUG = False
 WAGTAIL_ROOT = os.path.dirname(os.path.dirname(__file__))
 STATIC_ROOT = os.path.join(WAGTAIL_ROOT, 'tests', 'test-static')
@@ -195,8 +196,6 @@ if 'ELASTICSEARCH_URL' in os.environ:
         backend = 'wagtail.search.backends.elasticsearch6'
     elif os.environ.get('ELASTICSEARCH_VERSION') == '5':
         backend = 'wagtail.search.backends.elasticsearch5'
-    elif os.environ.get('ELASTICSEARCH_VERSION') == '2':
-        backend = 'wagtail.search.backends.elasticsearch2'
 
     WAGTAILSEARCH_BACKENDS['elasticsearch'] = {
         'BACKEND': backend,

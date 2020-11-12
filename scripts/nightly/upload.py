@@ -1,8 +1,9 @@
+import json
 import pathlib
 import sys
-import json
 
 import boto3
+
 
 dist_folder = pathlib.Path.cwd() / 'dist'
 

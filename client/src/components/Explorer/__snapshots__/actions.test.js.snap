@@ -1,29 +1,49 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`actions pushPage creates action 1`] = `
+exports[`actions gotoPage creates action 1`] = `
 Array [
   Object {
     "payload": Object {
       "id": 5,
+      "transition": 1,
     },
-    "type": "PUSH_PAGE",
-  },
-]
-`;
-
-exports[`actions pushPage triggers getChildren 1`] = `
-Array [
-  Object {
-    "payload": Object {
-      "id": 5,
-    },
-    "type": "PUSH_PAGE",
+    "type": "GOTO_PAGE",
   },
   Object {
     "payload": Object {
       "id": 5,
     },
     "type": "GET_CHILDREN_START",
+  },
+  Object {
+    "payload": Object {
+      "id": 5,
+    },
+    "type": "GET_TRANSLATIONS_START",
+  },
+]
+`;
+
+exports[`actions gotoPage triggers getChildren 1`] = `
+Array [
+  Object {
+    "payload": Object {
+      "id": 5,
+      "transition": 1,
+    },
+    "type": "GOTO_PAGE",
+  },
+  Object {
+    "payload": Object {
+      "id": 5,
+    },
+    "type": "GET_CHILDREN_START",
+  },
+  Object {
+    "payload": Object {
+      "id": 5,
+    },
+    "type": "GET_TRANSLATIONS_START",
   },
 ]
 `;
@@ -44,10 +64,6 @@ Array [
       "id": 5,
     },
     "type": "OPEN_EXPLORER",
-  },
-  Object {
-    "payload": 5,
-    "type": "GET_PAGE_START",
   },
 ]
 `;
@@ -84,8 +100,10 @@ Array [
     "type": "GET_CHILDREN_START",
   },
   Object {
-    "payload": 5,
-    "type": "GET_PAGE_START",
+    "payload": Object {
+      "id": 5,
+    },
+    "type": "GET_TRANSLATIONS_START",
   },
 ]
 `;

@@ -1,0 +1,32 @@
+===========================================
+Wagtail 2.12 release notes - IN DEVELOPMENT
+===========================================
+
+.. contents::
+    :local:
+    :depth: 1
+
+
+What's new
+==========
+
+
+Other features
+~~~~~~~~~~~~~~
+
+ * Added support for Python 3.9
+
+
+Bug fixes
+~~~~~~~~~
+
+ * ...
+
+
+Upgrade considerations
+======================
+
+Removed support for Elasticsearch 2
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Elasticsearch version 2 is no longer supported as of this release; please upgrade to Elasticsearch 5 or above before upgrading Wagtail.

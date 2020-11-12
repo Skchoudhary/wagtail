@@ -3,13 +3,14 @@
 # This file is distributed under the same license as the PACKAGE package.
 #
 # Translators:
+# ongchi <ihcgno@icloud.com>, 2020
 msgid ""
 msgstr ""
 "Project-Id-Version: Wagtail\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-08-21 13:30+0100\n"
-"PO-Revision-Date: 2020-08-21 12:31+0000\n"
-"Last-Translator: Matt Westcott <matthew@torchbox.com>\n"
+"POT-Creation-Date: 2020-10-23 12:34+0100\n"
+"PO-Revision-Date: 2020-11-02 15:39+0000\n"
+"Last-Translator: ongchi <ihcgno@icloud.com>\n"
 "Language-Team: Chinese Traditional (http://www.transifex.com/torchbox/"
 "wagtail/language/zh-Hant/)\n"
 "MIME-Version: 1.0\n"
@@ -20,6 +21,10 @@ msgstr ""
 
 msgid "Wagtail core"
 msgstr "Wagtail 核心組件"
+
+#, python-format
+msgid "%(label)s: this block has no options."
+msgstr "%(label)s：此區塊沒有選項"
 
 msgid "This block has no options."
 msgstr "這個區塊沒有選項"
@@ -41,8 +46,11 @@ msgstr "密碼"
 msgid "The password you have entered is not correct. Please try again."
 msgstr "密碼錯誤，請重新輸入"
 
+msgid "Comment"
+msgstr "評論"
+
 msgid "hostname"
-msgstr "主機名"
+msgstr "主機名稱"
 
 msgid "port"
 msgstr "埠號"
@@ -78,6 +86,9 @@ msgstr "站點"
 msgid "sites"
 msgstr "站點"
 
+msgid "default"
+msgstr "預設"
+
 #, python-format
 msgid ""
 "%(hostname)s is already configured as the default site. You must unset that "
@@ -107,7 +118,7 @@ msgid "live"
 msgstr "在用"
 
 msgid "has unpublished changes"
-msgstr "有未發佈的修改"
+msgstr "有未發佈的變更"
 
 msgid "URL path"
 msgstr "URL路徑"
@@ -159,6 +170,9 @@ msgstr "此縮略名已被使用"
 
 msgid "scheduled"
 msgstr "已計劃"
+
+msgid "in moderation"
+msgstr "審核中"
 
 msgid "draft"
 msgstr "草稿"
@@ -226,6 +240,15 @@ msgstr "刪除頁面及其子頁面"
 msgid "Lock"
 msgstr "鎖定"
 
+msgid "Lock/unlock pages you've locked"
+msgstr "鎖定/解鎖頁面"
+
+msgid "Unlock"
+msgstr "解鎖"
+
+msgid "Unlock any page"
+msgstr "解鎖作何頁面"
+
 msgid "group"
 msgstr "群組"
 
@@ -272,13 +295,13 @@ msgid "collection"
 msgstr "集合"
 
 msgid "collection view restriction"
-msgstr "集合查看限制"
+msgstr "集合檢視限制"
 
 msgid "collection view restrictions"
-msgstr "集合查看限制"
+msgstr "集合檢視限制"
 
 msgid "name"
-msgstr "名字"
+msgstr "名稱"
 
 msgid "collections"
 msgstr "集合"
@@ -291,6 +314,105 @@ msgstr "群組集合權限"
 
 msgid "group collection permissions"
 msgstr "群組集合權限"
+
+msgid "workflow"
+msgstr "工作流程"
+
+msgid "workflow page"
+msgstr "工作流程頁面"
+
+msgid "workflow pages"
+msgstr "工作流程頁面"
+
+msgid "workflow_tasks"
+msgstr "工作流程作業"
+
+msgid "task"
+msgstr "作業"
+
+msgid "workflow task order"
+msgstr "工作流程作業順序"
+
+msgid "workflow task orders"
+msgstr "工作流程作業順序"
+
+msgid "tasks"
+msgstr "作業"
+
+msgid "workflows"
+msgstr "工作流程"
+
+msgid "Request changes"
+msgstr "變更請求"
+
+msgid "Approve"
+msgstr "核准"
+
+msgid "Approve with comment"
+msgstr "評論並核准"
+
+msgid "Members of the chosen Wagtail Groups can approve this task"
+msgstr "選擇的群組成員可核准此項作業"
+
+msgid "Group approval task"
+msgstr "群組審核作業"
+
+msgid "Group approval tasks"
+msgstr "群組審核作業"
+
+msgid "In progress"
+msgstr "進行中"
+
+msgid "Approved"
+msgstr "己核准"
+
+msgid "Needs changes"
+msgstr "需要修訂"
+
+msgid "Cancelled"
+msgstr "已取消"
+
+msgid "status"
+msgstr "狀態"
+
+msgid "requested by"
+msgstr "要求者"
+
+msgid "current task state"
+msgstr "目前作業狀態"
+
+msgid "Workflow state"
+msgstr "工作流程狀態"
+
+msgid "Workflow states"
+msgstr "工作流程狀態"
+
+msgid "Rejected"
+msgstr "已拒絕"
+
+msgid "Skipped"
+msgstr "已略過"
+
+msgid "workflow state"
+msgstr "工作流程狀態"
+
+msgid "started at"
+msgstr "開始於"
+
+msgid "finished at"
+msgstr "結束於"
+
+msgid "Task state"
+msgstr "作業狀態"
+
+msgid "Task states"
+msgstr "作業狀態"
+
+msgid "timestamp (UTC)"
+msgstr "時間標記 (UTC)"
+
+msgid "system"
+msgstr "系統"
 
 msgid "Log in"
 msgstr "登入"

@@ -1,6 +1,7 @@
 import json
 import logging
 import uuid
+
 from collections import namedtuple
 from io import StringIO
 from urllib.parse import urlparse
@@ -43,9 +44,9 @@ from treebeard.mp_tree import MP_Node
 from wagtail.core.forms import TaskStateCommentForm
 from wagtail.core.query import PageQuerySet, TreeQuerySet
 from wagtail.core.signals import (
-    page_published, page_unpublished, post_page_move, pre_page_move,
-    task_approved, task_cancelled, task_rejected, task_submitted,
-    workflow_approved, workflow_cancelled, workflow_rejected, workflow_submitted)
+    page_published, page_unpublished, post_page_move, pre_page_move, task_approved, task_cancelled,
+    task_rejected, task_submitted, workflow_approved, workflow_cancelled, workflow_rejected,
+    workflow_submitted)
 from wagtail.core.sites import get_site_for_hostname
 from wagtail.core.treebeard import TreebeardPathFixMixin
 from wagtail.core.url_routing import RouteResult
@@ -54,6 +55,7 @@ from wagtail.search import index
 
 from .utils import (
     find_available_slug, get_content_languages, get_supported_content_language_variant)
+
 
 logger = logging.getLogger('wagtail.core')
 
@@ -298,7 +300,11 @@ class Site(models.Model):
         """
         result = cache.get('wagtail_site_root_paths')
 
-        if result is None:
+        # Wagtail 2.11 changed the way site root paths were stored. This can cause an upgraded 2.11
+        # site to break when loading cached site root paths that were cached with 2.10.2 or older
+        # versions of Wagtail. The line below checks if the any of the cached site urls is consistent
+        # with an older version of Wagtail and invalidates the cache.
+        if result is None or any(len(site_record) == 3 for site_record in result):
             result = []
 
             for site in Site.objects.select_related('root_page', 'root_page__locale').order_by('-root_page__url_path', '-is_default_site', 'hostname'):
@@ -335,6 +341,10 @@ class LocaleManager(models.Manager):
 
 
 class Locale(models.Model):
+    #: The language code that represents this locale
+    #:
+    #: The language code can either be a language code on its own (such as ``en``, ``fr``),
+    #: or it can include a region code (such as ``en-gb``, ``fr-fr``).
     language_code = models.CharField(max_length=100, unique=True)
 
     # Objects excludes any Locales that have been removed from LANGUAGES, This effectively disables them
@@ -350,7 +360,7 @@ class Locale(models.Model):
     @classmethod
     def get_default(cls):
         """
-        Returns the default Locale based on the site's LOCALE_CODE setting
+        Returns the default Locale based on the site's LANGUAGE_CODE setting
         """
         return cls.objects.get_for_language(settings.LANGUAGE_CODE)
 
@@ -405,6 +415,11 @@ class TranslatableMixin(models.Model):
 
     @property
     def localized(self):
+        """
+        Finds the translation in the current active language.
+
+        If there is no translation in the active language, self is returned.
+        """
         locale = Locale.get_active()
 
         if locale.id == self.locale_id:
@@ -413,6 +428,9 @@ class TranslatableMixin(models.Model):
         return self.get_translation_or_none(locale) or self
 
     def get_translations(self, inclusive=False):
+        """
+        Returns a queryset containing the translations of this instance.
+        """
         translations = self.__class__.objects.filter(
             translation_key=self.translation_key
         )
@@ -423,20 +441,35 @@ class TranslatableMixin(models.Model):
         return translations
 
     def get_translation(self, locale):
+        """
+        Finds the translation in the specified locale.
+
+        If there is no translation in that locale, this raises a ``model.DoesNotExist`` exception.
+        """
         return self.get_translations(inclusive=True).get(locale_id=pk(locale))
 
     def get_translation_or_none(self, locale):
+        """
+        Finds the translation in the specified locale.
+
+        If there is no translation in that locale, this returns None.
+        """
         try:
             return self.get_translation(locale)
         except self.__class__.DoesNotExist:
             return None
 
     def has_translation(self, locale):
+        """
+        Returns True if a translation exists in the specified locale.
+        """
         return self.get_translations(inclusive=True).filter(locale_id=pk(locale)).exists()
 
     def copy_for_translation(self, locale):
         """
-        Copies this instance for the specified locale.
+        Creates a copy of this instance with the specified locale.
+
+        Note that the copy is initially unsaved.
         """
         translated = self.__class__.objects.get(id=self.id)
         translated.id = None
@@ -471,15 +504,17 @@ class TranslatableMixin(models.Model):
         return Locale.get_default()
 
     @classmethod
-    def get_translation_model(self):
+    def get_translation_model(cls):
         """
-        Gets the model which manages the translations for this model.
-        (The model that has the "translation_key" and "locale" fields)
-        Most of the time this would be the current model, but some sites
-        may have intermediate concrete models between wagtailcore.Page and
-        the specfic page model.
+        Returns this model's "Translation model".
+
+        The "Translation model" is the model that has the ``locale`` and
+        ``translation_key`` fields.
+        Typically this would be the current model, but it may be a
+        super-class if multi-table inheritance is in use (as is the case
+        for ``wagtailcore.Page``).
         """
-        return self._meta.get_field("locale").model
+        return cls._meta.get_field("locale").model
 
 
 def bootstrap_translatable_model(model, locale):
@@ -543,6 +578,11 @@ class BootstrapTranslatableMixin(TranslatableMixin):
     locale = models.ForeignKey(
         Locale, on_delete=models.PROTECT, null=True, related_name="+", editable=False
     )
+
+    @classmethod
+    def check(cls, **kwargs):
+        # skip the check in TranslatableMixin that enforces the unique-together constraint
+        return super(TranslatableMixin, cls).check(**kwargs)
 
     class Meta:
         abstract = True
@@ -969,7 +1009,9 @@ class Page(AbstractPage, index.Indexed, ClusterableModel, metaclass=PageBase):
             self._update_descendant_url_paths(old_url_path, new_url_path)
 
         # Check if this is a root page of any sites and clear the 'wagtail_site_root_paths' key if so
-        if not is_new and self.is_site_root():
+        # Note: New translations of existing site roots are considered site roots as well, so we must
+        #       always check if this page is a site root, even if it's new.
+        if self.is_site_root():
             cache.delete('wagtail_site_root_paths')
 
         # Log
@@ -1150,7 +1192,7 @@ class Page(AbstractPage, index.Indexed, ClusterableModel, metaclass=PageBase):
     @property
     def cached_content_type(self):
         """
-        versionadded:: 2.10
+        .. versionadded:: 2.10
 
         Return this page's ``content_type`` value from the ``ContentType``
         model's cached manager, which will avoid a database query if the
@@ -1160,6 +1202,14 @@ class Page(AbstractPage, index.Indexed, ClusterableModel, metaclass=PageBase):
 
     @property
     def localized_draft(self):
+        """
+        Finds the translation in the current active language.
+
+        If there is no translation in the active language, self is returned.
+
+        Note: This will return translations that are in draft. If you want to exclude
+        these, use the ``.localized`` attribute.
+        """
         locale = Locale.get_active()
 
         if locale.id == self.locale_id:
@@ -1169,6 +1219,14 @@ class Page(AbstractPage, index.Indexed, ClusterableModel, metaclass=PageBase):
 
     @property
     def localized(self):
+        """
+        Finds the translation in the current active language.
+
+        If there is no translation in the active language, self is returned.
+
+        Note: This will not return the translation if it is in draft.
+        If you want to include drafts, use the ``.localized_draft`` attribute instead.
+        """
         localized = self.localized_draft
         if not localized.live:
             return self
@@ -1528,10 +1586,28 @@ class Page(AbstractPage, index.Indexed, ClusterableModel, metaclass=PageBase):
             else:
                 site_id, root_path, root_url, language_code = possible_sites[0]
 
+        use_wagtail_i18n = getattr(settings, 'WAGTAIL_I18N_ENABLED', False)
+
+        if use_wagtail_i18n:
+            # If the active language code is a variant of the page's language, then
+            # use that instead
+            # This is used when LANGUAGES contain more languages than WAGTAIL_CONTENT_LANGUAGES
+            try:
+                if get_supported_content_language_variant(translation.get_language()) == language_code:
+                    language_code = translation.get_language()
+            except LookupError:
+                # active language code is not a recognised content language, so leave
+                # page's language code unchanged
+                pass
+
         # The page may not be routable because wagtail_serve is not registered
         # This may be the case if Wagtail is used headless
         try:
-            with translation.override(language_code):
+            if use_wagtail_i18n:
+                with translation.override(language_code):
+                    page_path = reverse(
+                        'wagtail_serve', args=(self.url_path[len(root_path):],))
+            else:
                 page_path = reverse(
                     'wagtail_serve', args=(self.url_path[len(root_path):],))
         except NoReverseMatch:
@@ -2214,7 +2290,24 @@ class Page(AbstractPage, index.Indexed, ClusterableModel, metaclass=PageBase):
     @transaction.atomic
     def copy_for_translation(self, locale, copy_parents=False, alias=False, exclude_fields=None):
         """
-        Copies this page for the specified locale.
+        Creates a copy of this page in the specified locale.
+
+        The new page will be created in draft as a child of this page's translated
+        parent.
+
+        For example, if you are translating a blog post from English into French,
+        this method will look for the French version of the blog index and create
+        the French translation of the blog post under that.
+
+        If this page's parent is not translated into the locale, then a ``ParentNotTranslatedError``
+        is raised. You can circumvent this error by passing ``copy_parents=True`` which
+        copies any parents that are not translated yet.
+
+        The ``exclude_fields`` parameter can be used to set any fields to a blank value
+        in the copy.
+
+        Note that this method calls the ``.copy()`` method internally so any fields that
+        are excluded in ``.exclude_fields_in_copy`` will be excluded from the translation.
         """
         # Find the translated version of the parent page to create the new page under
         parent = self.get_parent().specific
@@ -3550,6 +3643,13 @@ class CollectionMember(models.Model):
         abstract = True
 
 
+class GroupCollectionPermissionManager(models.Manager):
+    def get_by_natural_key(self, group, collection, permission):
+        return self.get(group=group,
+                        collection=collection,
+                        permission=permission)
+
+
 class GroupCollectionPermission(models.Model):
     """
     A rule indicating that a group has permission for some action (e.g. "create document")
@@ -3579,6 +3679,11 @@ class GroupCollectionPermission(models.Model):
             self.permission,
             self.collection.id, self.collection
         )
+
+    def natural_key(self):
+        return (self.group, self.collection, self.permission)
+
+    objects = GroupCollectionPermissionManager()
 
     class Meta:
         unique_together = ('group', 'collection', 'permission')

@@ -15,6 +15,7 @@ from wagtail.core import hooks
 from wagtail.core.models import (
     Page, PageRevision, TaskState, UserPagePermissionsProxy, WorkflowState)
 
+
 User = get_user_model()
 
 
@@ -32,6 +33,17 @@ class UpgradeNotificationPanel:
             return render_to_string('wagtailadmin/home/upgrade_notification.html', {}, request=self.request)
         else:
             return ""
+
+
+class IE11WarningPanel:
+    name = 'ie11_warning'
+    order = 110
+
+    def __init__(self, request):
+        self.request = request
+
+    def render(self):
+        return render_to_string('wagtailadmin/home/ie11_warning.html', {}, request=self.request)
 
 
 class PagesForModerationPanel:
@@ -158,6 +170,7 @@ def home(request):
     panels = [
         SiteSummaryPanel(request),
         UpgradeNotificationPanel(request),
+        IE11WarningPanel(request),
         WorkflowPagesToModeratePanel(request),
         PagesForModerationPanel(request),
         UserPagesInWorkflowModerationPanel(request),

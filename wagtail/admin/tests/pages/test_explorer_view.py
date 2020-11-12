@@ -1,11 +1,11 @@
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core import paginator
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from wagtail.admin.tests.pages.timestamps import local_datetime
-from wagtail.core.models import GroupPagePermission, Page
+from wagtail.core.models import GroupPagePermission, Locale, Page
 from wagtail.tests.testapp.models import SimplePage, SingleEventPage, StandardIndex
 from wagtail.tests.utils import WagtailTestUtils
 
@@ -307,7 +307,16 @@ class TestBreadcrumb(TestCase, WagtailTestUtils):
 
         # The breadcrumb should pick up SimplePage's overridden get_admin_display_title method
         expected_url = reverse('wagtailadmin_explore', args=(Page.objects.get(url_path='/home/secret-plans/').id, ))
-        self.assertContains(response, """<li><a href="%s">Secret plans (simple page)</a></li>""" % expected_url)
+        expected = """
+            <li>
+                <a href="%s"><span class="title">Secret plans (simple page)</span>
+                    <svg class="icon icon-arrow-right arrow_right_icon" aria-hidden="true" focusable="false">
+                        <use href="#icon-arrow-right"></use>
+                    </svg>
+                </a>
+            </li>
+        """ % expected_url
+        self.assertContains(response, expected, html=True)
 
 
 class TestPageExplorerSignposting(TestCase, WagtailTestUtils):
@@ -506,13 +515,42 @@ class TestExplorablePageVisibility(TestCase, WagtailTestUtils):
         self.login(username='superman', password='password')
         response = self.client.get(reverse('wagtailadmin_explore', args=[6]))
         self.assertEqual(response.status_code, 200)
-
-        self.assertInHTML(
-            """<li class="home"><a href="/admin/pages/" class="icon icon-site text-replace">Root</a></li>""",
-            str(response.content)
-        )
-        self.assertInHTML("""<li><a href="/admin/pages/4/">Welcome to example.com!</a></li>""", str(response.content))
-        self.assertInHTML("""<li><a href="/admin/pages/5/">Content</a></li>""", str(response.content))
+        expected = """
+            <li class="home">
+                <a href="/admin/pages/">
+                    <svg class="icon icon-site home_icon" aria-hidden="true" focusable="false">
+                        <use href="#icon-site"></use>
+                    </svg>
+                    <span class="visuallyhidden">Root</span>
+                    <svg class="icon icon-arrow-right arrow_right_icon" aria-hidden="true" focusable="false">
+                        <use href="#icon-arrow-right"></use>
+                    </svg>
+                </a>
+            </li>
+        """
+        self.assertContains(response, expected, html=True)
+        expected = """
+            <li>
+                <a href="/admin/pages/4/">
+                    <span class="title">Welcome to example.com!</span>
+                    <svg class="icon icon-arrow-right arrow_right_icon" aria-hidden="true" focusable="false">
+                        <use href="#icon-arrow-right"></use>
+                    </svg>
+                </a>
+            </li>
+        """
+        self.assertContains(response, expected, html=True)
+        expected = """
+            <li>
+                <a href="/admin/pages/5/">
+                    <span class="title">Content</span>
+                    <svg class="icon icon-arrow-right arrow_right_icon" aria-hidden="true" focusable="false">
+                        <use href="#icon-arrow-right"></use>
+                    </svg>
+                </a>
+            </li>
+        """
+        self.assertContains(response, expected, html=True)
 
     def test_nonadmin_sees_breadcrumbs_up_to_cca(self):
         self.login(username='josh', password='password')
@@ -520,11 +558,31 @@ class TestExplorablePageVisibility(TestCase, WagtailTestUtils):
         self.assertEqual(response.status_code, 200)
         # While at "Page 1", Josh should see the breadcrumbs leading only as far back as the example.com homepage,
         # since it's his Closest Common Ancestor.
-        self.assertInHTML(
-            """<li class="home"><a href="/admin/pages/4/" class="icon icon-home text-replace">Home</a></li>""",
-            str(response.content)
-        )
-        self.assertInHTML("""<li><a href="/admin/pages/5/">Content</a></li>""", str(response.content))
+        expected = """
+            <li class="home">
+                <a href="/admin/pages/4/" class="text-replace">
+                    <svg class="icon icon-site home_icon" aria-hidden="true" focusable="false">
+                        <use href="#icon-site"></use>
+                    </svg>
+                    <span class="visuallyhidden">Home</span>
+                </a>
+                <svg class="icon icon-arrow-right arrow_right_icon" aria-hidden="true" focusable="false">
+                    <use href="#icon-arrow-right"></use>
+                </svg>
+            </li>
+        """
+        self.assertContains(response, expected, html=True)
+        expected = """
+            <li>
+                <a href="/admin/pages/5/">
+                    <span class="title">Content</span>
+                    <svg class="icon icon-arrow-right arrow_right_icon" aria-hidden="true" focusable="false">
+                        <use href="#icon-arrow-right"></use>
+                    </svg>
+                </a>
+            </li>
+        """
+        self.assertContains(response, expected, html=True)
         # The page title shouldn't appear because it's the "home" breadcrumb.
         self.assertNotContains(response, "Welcome to example.com!")
 
@@ -542,3 +600,35 @@ class TestExplorablePageVisibility(TestCase, WagtailTestUtils):
         self.assertEqual(response.status_code, 200)
         # Since Mary has no page permissions, she should not see the breadcrumb
         self.assertNotContains(response, """<li class="home"><a href="/admin/pages/4/" class="icon icon-home text-replace">Home</a></li>""")
+
+
+@override_settings(WAGTAIL_I18N_ENABLED=True)
+class TestLocaleSelector(TestCase, WagtailTestUtils):
+    fixtures = ['test.json']
+
+    def setUp(self):
+        self.events_page = Page.objects.get(url_path='/home/events/')
+        self.fr_locale = Locale.objects.create(language_code='fr')
+        self.translated_events_page = self.events_page.copy_for_translation(self.fr_locale, copy_parents=True)
+        self.user = self.login()
+
+    def test_locale_selector(self):
+        response = self.client.get(
+            reverse('wagtailadmin_explore', args=[self.events_page.id])
+        )
+
+        self.assertContains(response, '<li class="header-meta--locale">')
+
+        add_translation_url = reverse('wagtailadmin_explore', args=[self.translated_events_page.id])
+        self.assertContains(response, f'<a href="{add_translation_url}" aria-label="French" class="u-link is-live">')
+
+    @override_settings(WAGTAIL_I18N_ENABLED=False)
+    def test_locale_selector_not_present_when_i18n_disabled(self):
+        response = self.client.get(
+            reverse('wagtailadmin_explore', args=[self.events_page.id])
+        )
+
+        self.assertNotContains(response, '<li class="header-meta--locale">')
+
+        add_translation_url = reverse('wagtailadmin_explore', args=[self.translated_events_page.id])
+        self.assertNotContains(response, f'<a href="{add_translation_url}" aria-label="French" class="u-link is-live">')

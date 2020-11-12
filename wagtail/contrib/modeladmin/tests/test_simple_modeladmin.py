@@ -288,6 +288,10 @@ class TestCreateView(TestCase, WagtailTestUtils):
         # Check that the link was created
         self.assertEqual(RelatedLink.objects.filter(title="Homepage").count(), 1)
 
+    def test_prepopulated_field_data_in_context(self):
+        response = self.get()
+        self.assertIn('data-prepopulated-fields="[{&quot;id&quot;: &quot;#id_title&quot;, &quot;name&quot;: &quot;title&quot;, &quot;dependency_ids&quot;: [&quot;#id_author&quot;], &quot;dependency_list&quot;: [&quot;author&quot;], &quot;maxLength&quot;: 255, &quot;allowUnicode&quot;: false}]"', response.content.decode('UTF-8'))
+
 
 class TestInspectView(TestCase, WagtailTestUtils):
     fixtures = ['modeladmintest_test.json']
@@ -563,7 +567,6 @@ class TestDeleteViewModelReprPrimary(TestCase, WagtailTestUtils):
 
 class TestEditorAccess(TestCase, WagtailTestUtils):
     fixtures = ['modeladmintest_test.json']
-    expected_status_code = 403
 
     def setUp(self):
         # Create a user
@@ -576,27 +579,27 @@ class TestEditorAccess(TestCase, WagtailTestUtils):
 
     def test_index_permitted(self):
         response = self.client.get('/admin/modeladmintest/book/')
-        self.assertEqual(response.status_code, self.expected_status_code)
+        self.assertRedirects(response, '/admin/')
 
     def test_inpspect_permitted(self):
         response = self.client.get('/admin/modeladmintest/book/inspect/2/')
-        self.assertEqual(response.status_code, self.expected_status_code)
+        self.assertRedirects(response, '/admin/')
 
     def test_create_permitted(self):
         response = self.client.get('/admin/modeladmintest/book/create/')
-        self.assertEqual(response.status_code, self.expected_status_code)
+        self.assertRedirects(response, '/admin/')
 
     def test_edit_permitted(self):
         response = self.client.get('/admin/modeladmintest/book/edit/2/')
-        self.assertEqual(response.status_code, self.expected_status_code)
+        self.assertRedirects(response, '/admin/')
 
     def test_delete_get_permitted(self):
         response = self.client.get('/admin/modeladmintest/book/delete/2/')
-        self.assertEqual(response.status_code, self.expected_status_code)
+        self.assertRedirects(response, '/admin/')
 
     def test_delete_post_permitted(self):
         response = self.client.post('/admin/modeladmintest/book/delete/2/')
-        self.assertEqual(response.status_code, self.expected_status_code)
+        self.assertRedirects(response, '/admin/')
 
 
 class TestQuoting(TestCase, WagtailTestUtils):
@@ -641,7 +644,20 @@ class TestHeaderBreadcrumbs(TestCase, WagtailTestUtils):
         self.assertTemplateUsed(response, 'wagtailadmin/shared/header.html')
 
         # check that home breadcrumb link exists
-        self.assertContains(response, '<li class="home"><a href="/admin/" class="icon icon-home text-replace">Home</a></li>', html=True)
+        expected = """
+            <li class="home">
+                <a href="/admin/">
+                    <svg class="icon icon-home home_icon" aria-hidden="true" focusable="false">
+                        <use href="#icon-home"></use>
+                    </svg>
+                    <span class="visuallyhidden">Home</span>
+                    <svg class="icon icon-arrow-right arrow_right_icon" aria-hidden="true" focusable="false">
+                        <use href="#icon-arrow-right"></use>
+                    </svg>
+                </a>
+            </li>
+        """
+        self.assertContains(response, expected, html=True)
 
         # check that the breadcrumbs are before the first header closing tag
         content_str = str(response.content)

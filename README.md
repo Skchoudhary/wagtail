@@ -57,7 +57,7 @@ _(If you are reading this on GitHub, the details here may not be indicative of t
 Wagtail supports:
 
 * Django 2.2.x, 3.0.x and 3.1.x
-* Python 3.6, 3.7 and 3.8
+* Python 3.6, 3.7, 3.8 and 3.9
 * PostgreSQL, MySQL and SQLite as database backends
 
 [Previous versions of Wagtail](https://docs.wagtail.io/en/stable/releases/upgrading.html#compatible-django-python-versions) additionally supported Python 2.7 and Django 1.x.
@@ -112,7 +112,7 @@ We thank the following organisations for their services used in Wagtail's develo
 [Squash](https://www.squash.io/) provides the project with free test environments for reviewing pull requests.
 
 
-[![Build Status](https://api.travis-ci.org/wagtail/wagtail.svg?branch=master)](https://travis-ci.org/wagtail/wagtail)
+[![Build Status](https://github.com/wagtail/wagtail/workflows/Wagtail%20CI/badge.svg)](https://github.com/wagtail/wagtail/actions)
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 [![Version](https://img.shields.io/pypi/v/wagtail.svg)](https://pypi.python.org/pypi/wagtail/) 
 [![Coverage](https://codecov.io/github/wagtail/wagtail/coverage.svg?branch=master)](https://codecov.io/github/wagtail/wagtail?branch=master)

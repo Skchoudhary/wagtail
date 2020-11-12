@@ -1,7 +1,6 @@
 import json
-import warnings
-from datetime import datetime
 
+from datetime import datetime
 from urllib.parse import urljoin
 
 from django import template
@@ -14,6 +13,7 @@ from django.template.defaultfilters import stringfilter
 from django.template.loader import render_to_string
 from django.templatetags.static import static
 from django.utils import timezone
+from django.utils.encoding import force_str
 from django.utils.html import avoid_wrapping, format_html, format_html_join
 from django.utils.safestring import mark_safe
 from django.utils.timesince import timesince
@@ -27,11 +27,13 @@ from wagtail.admin.search import admin_search_areas
 from wagtail.admin.staticfiles import versioned_static as versioned_static_func
 from wagtail.core import hooks
 from wagtail.core.models import (
-    Collection, CollectionViewRestriction, Page, PageLogEntry, PageViewRestriction, UserPagePermissionsProxy)
+    Collection, CollectionViewRestriction, Locale, Page, PageLogEntry, PageViewRestriction,
+    UserPagePermissionsProxy)
+from wagtail.core.utils import camelcase_to_underscore
 from wagtail.core.utils import cautious_slugify as _cautious_slugify
-from wagtail.core.utils import accepts_kwarg, camelcase_to_underscore, escape_script
+from wagtail.core.utils import escape_script
 from wagtail.users.utils import get_gravatar_url
-from wagtail.utils.deprecation import RemovedInWagtail212Warning
+
 
 register = template.Library()
 
@@ -438,15 +440,7 @@ def page_listing_buttons(context, page, page_perms, is_parent=False):
 
     buttons = []
     for hook in button_hooks:
-        if accepts_kwarg(hook, 'next_url'):
-            buttons.extend(hook(page, page_perms, is_parent, next_url))
-        else:
-            warnings.warn(
-                'register_page_listing_buttons hooks will require an additional kwarg `next_url` in a future release. '
-                'Please update your hook function to accept `next_url`.',
-                RemovedInWagtail212Warning
-            )
-            buttons.extend(hook(page, page_perms, is_parent))
+        buttons.extend(hook(page, page_perms, is_parent, next_url))
 
     buttons.sort()
 
@@ -634,3 +628,19 @@ def user_display_name(user):
         # we were passed None or something else that isn't a valid user object; return
         # empty string to replicate the behaviour of {{ user.get_full_name|default:user.get_username }}
         return ''
+
+
+@register.simple_tag
+def i18n_enabled():
+    return getattr(settings, 'WAGTAIL_I18N_ENABLED', False)
+
+
+@register.simple_tag
+def locales():
+    return json.dumps([
+        {
+            'code': locale.language_code,
+            'display_name': force_str(locale.get_display_name()),
+        }
+        for locale in Locale.objects.all()
+    ])
